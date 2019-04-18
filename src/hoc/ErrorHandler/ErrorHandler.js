@@ -1,39 +1,17 @@
-import React, {useState, useEffect} from 'react'
+import React from 'react'
 import Aux from '../Auxiliary'
 import Modal from '../../components/UI/Modal/Modal'
+import useHttpErrorHandler from '../../hooks/http-error-handler'
 
 const ErrorHandler=(WrappedComponent, axios)=>{
     return (props)=>{
 
-        const [error, setError]=useState(null);
-
-
-        //these lines will run before the rendering of "return(JSX..)" just like codes inside "componentWillmount()
-        const reqInterceptors=axios.interceptors.request.use(req=>{
-            setError(null);
-            return req;
-        });
-        const resInterceptors=axios.interceptors.response.use(res=>res, error => {
-            setError(error);
-        });
-
-
-        useEffect(()=>{
-            return()=>{ // these code will before the component gets unmounted just like "componentWillUnmount()"
-                axios.interceptors.response.eject(resInterceptors);
-                axios.interceptors.request.eject(reqInterceptors);
-            };
-        }, [resInterceptors, reqInterceptors]);
-
-
-        const errorConfiremedHandler=()=>{
-            setError(null)
-        };
+            const [error, clearError]=useHttpErrorHandler(axios); //the two things returned from the custom hook// we can name them as we like we dont have to use the exact name we used to return them from the custom hook
 
 
             return (
                 <Aux>
-                    <Modal show={error} modalClose={errorConfiremedHandler}>
+                    <Modal show={error} modalClose={clearError}>
                         {error? error.message : null}
                     </Modal>
                     <WrappedComponent {...props}/>
