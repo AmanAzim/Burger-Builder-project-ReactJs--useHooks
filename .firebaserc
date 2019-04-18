@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "Burger-Builder": "react-burger-buider",
+    "default": "react-burger-buider"
+  }
+}
