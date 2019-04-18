@@ -1,4 +1,4 @@
-import React, { Component, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import {Route, Switch, withRouter, Redirect} from 'react-router-dom';
 import {connect} from 'react-redux';
 import * as Actions from './store/actions/exportAllActions'
@@ -15,13 +15,13 @@ const Checkout = React.lazy(()=> import('./containers/Checkout/Checkout'));
 
 //render={()=> <Suspense fallback={<div>Loading</div>}> <Auth/> </Suspense>}
 
-class App extends Component {
+const App =(props)=> {
 
-  componentDidMount() {
-      this.props.onTryAutoSignIn();
-  }
 
-  render() {
+  useEffect(()=>{
+      props.onTryAutoSignIn();
+  }, []);
+
     let routes=(
         <Switch>
             <Route path="/auth" render={()=> <Suspense fallback={<div>Loading</div>}> <Auth/> </Suspense>} />
@@ -30,7 +30,7 @@ class App extends Component {
         </Switch>
     );
 
-    if(this.props.isAuthenticated){
+    if(props.isAuthenticated){
         routes=(
             <Switch>
                 <Route path="/checkout" render={()=> <Suspense fallback={<div>Loading</div>}> <Checkout {...this.props}/> </Suspense>}/>
@@ -49,7 +49,7 @@ class App extends Component {
         </Layout>
       </div>
     );
-  }
+
 }
 
 const mapStateToProps=state=>{
