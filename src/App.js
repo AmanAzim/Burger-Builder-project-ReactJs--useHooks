@@ -32,11 +32,11 @@ const App =(props)=> {
 
     if(props.isAuthenticated){
         routes=(
-            <Switch>
-                <Route path="/checkout" render={()=> <Suspense fallback={<div>Loading</div>}> <Checkout {...this.props}/> </Suspense>}/>
+            <Switch>                                                                                         //an alternative way of passing route related props to a child
+                <Route path="/checkout" render={(props)=> <Suspense fallback={<div>Loading</div>}> <Checkout {...props}/> </Suspense>}/>
                 <Route path="/logout" component={Logout}/>
                 <Route path="/orders" render={()=> <Suspense fallback={<div>Loading</div>}> <Orders /> </Suspense>} />
-                <Route path="/auth" render={()=> <Suspense fallback={<div>Loading</div>}> <Auth/> </Suspense>} />
+                <Route path="/auth" render={(props)=> <Suspense fallback={<div>Loading</div>}> <Auth /> </Suspense>} />
                 <Route path="/" exact component={BurgerBuilder} />
                 <Redirect to="/" />
             </Switch>

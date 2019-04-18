@@ -1,4 +1,4 @@
-import React, {Component} from 'react'
+import React, {useState, useEffect} from 'react'
 import CssContactData from './ContactData.module.css'
 import axios from '../../../axios-orders'
 import Button from '../../../components/UI/Button/Button'
@@ -9,9 +9,9 @@ import errorHandler from '../../../hoc/ErrorHandler/ErrorHandler'
 import * as orderActions from '../../../store/actions/exportAllActions'
 
 
-class ContactData extends Component{
-    state={
-         orderForm:{
+const ContactData =(props)=>{
+
+        const [orderForm, setOrderForm]=useState({
              name:{
                 elementType:'input',
                 elementConfig:{
@@ -91,11 +91,12 @@ class ContactData extends Component{
                  validation:{},
                  valid:true
              }
-         },
-         formIsValid:false,
-    };
+        });
 
-    checkValidity=(value, rules)=>{
+        const [formIsValid, setFormIsValid]=useState(false);
+
+
+    const checkValidity=(value, rules)=>{
         let isValid=true;
 
         if(!rules){ // so thah the validation checking operation does not fail. for in case we don;t have the "validation" property in any orderForm item. such as "delivaryMethod"
@@ -117,13 +118,13 @@ class ContactData extends Component{
         return isValid;
     };
 
-    inputChangeHandler=(event, ElementId)=>{
+    const inputChangeHandler=(event, ElementId)=>{
         console.log(event.target.value);
-        const updatedOrderForm={...this.state.orderForm}; // only the first level object pointers are copied such as "name", "street", "email etc"
+        const updatedOrderForm={...orderForm}; // only the first level object pointers are copied such as "name", "street", "email etc"
         const updatedOrderFormElement={...updatedOrderForm[ElementId]}; //deep cloning now the inner object of each object are also copied such as all the properties of "name" object
 
         updatedOrderFormElement.value=event.target.value;
-        updatedOrderFormElement.valid=this.checkValidity(updatedOrderFormElement.value, updatedOrderFormElement.validation);
+        updatedOrderFormElement.valid=checkValidity(updatedOrderFormElement.value, updatedOrderFormElement.validation);
         updatedOrderFormElement.touched=true;
 
         //console.log(updatedOrderFormElement);
@@ -134,59 +135,60 @@ class ContactData extends Component{
             formIsValid= updatedOrderForm[inputId].valid && formIsValid;
         }
 
-        this.setState({orderForm:updatedOrderForm, formIsValid:formIsValid});
+        setOrderForm(updatedOrderForm);
+        setFormIsValid(formIsValid);
     };
 
 
-    onOrderHandler=(event)=>{
+    const onOrderHandler=(event)=>{
         event.preventDefault();//to prevent the page reload upon clicking submit button inside the form
 
         const formData={};
-        for(let formElementKey in this.state.orderForm){
-            formData[formElementKey]=this.state.orderForm[formElementKey].value;
+        for(let formElementKey in orderForm){
+            formData[formElementKey]=orderForm[formElementKey].value;
         }
 
        const order={
-           ingredients:this.props.ingredients,
-           price:this.props.totalPrice,
+           ingredients:props.ingredients,
+           price:props.totalPrice,
            orderData:formData,
-           userId:this.props.userId
+           userId:props.userId
        };
 
-       this.props.onBurgerOrder(order, this.props.token);
-    }
-    render(){
-        const formElementArray=[];
-        for(let key in this.state.orderForm){
-            formElementArray.push({id:key, config:this.state.orderForm[key]});
-        }
-        let form=(
-            <form onSubmit={this.onOrderHandler}>
-                {formElementArray.map( formElem=>{
-                    return <CustomInput key={formElem.id}
-                                        elementType={formElem.config.elementType}
-                                        elementConfig={formElem.config.elementConfig}
-                                        value={formElem.config.value}
-                                        invalid={!formElem.config.valid}
-                                        shouldValidate={formElem.config.validation}
-                                        touched={formElem.config.touched}
-                                        changed={(event)=>this.inputChangeHandler(event, formElem.id)}/>;
-                })}
+       props.onBurgerOrder(order, props.token);
+    };
 
-                <Button btnType="Success" disabled={!this.state.formIsValid}>Order</Button>
-            </form>
-            );
-        if(this.props.loading){
-            form=<Spinner/>;
-        }
-        return(
-            <div className={CssContactData.ContactData}>
-                <h4>Enter your contact data</h4>
-                {form}
-            </div>
-        )
+
+    const formElementArray=[];
+    for(let key in orderForm){
+        formElementArray.push({id:key, config:orderForm[key]});
     }
-}
+    let form=(
+        <form onSubmit={onOrderHandler}>
+            {formElementArray.map( formElem=>{
+                return <CustomInput key={formElem.id}
+                                    elementType={formElem.config.elementType}
+                                    elementConfig={formElem.config.elementConfig}
+                                    value={formElem.config.value}
+                                    invalid={!formElem.config.valid}
+                                    shouldValidate={formElem.config.validation}
+                                    touched={formElem.config.touched}
+                                    changed={(event)=>inputChangeHandler(event, formElem.id)}/>;
+            })}
+
+            <Button btnType="Success" disabled={!formIsValid}>Order</Button>
+        </form>
+    );
+    if(props.loading){
+        form=<Spinner/>;
+    }
+    return(
+        <div className={CssContactData.ContactData}>
+            <h4>Enter your contact data</h4>
+            {form}
+        </div>
+    );
+};
 
 const mapStateToProps=state=>{
     return {
